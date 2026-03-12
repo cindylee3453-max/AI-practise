@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>个人主页 - 示例</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* 基础样式与布局 */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f7;
+      color: #1f2933;
+      line-height: 1.6;
+      scroll-behavior: smooth;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* 顶部导航 */
+    header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 60px;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 100;
+    }
+    .logo {
+      font-weight: 700;
+      font-size: 20px;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+    nav li a {
+      font-size: 14px;
+      padding: 4px 0;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s ease, border-color 0.2s ease;
+    }
+    nav li a.active,
+    nav li a:hover {
+      color: #4c6fff;
+      border-color: #4c6fff;
+    }
+
+    /* 公共容器 */
+    main {
+      padding-top: 60px; /* 避开固定导航 */
+    }
+    section {
+      padding: 60px 20px;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    h1, h2 {
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+    h1 { font-size: 32px; }
+    h2 { font-size: 24px; }
+
+    /* Hero + 轮播 */
+    .hero {
+      min-height: calc(100vh - 60px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+    .hero-title {
+      font-size: 40px;
+      margin-bottom: 12px;
+    }
+    .hero-subtitle {
+      font-size: 18px;
+      color: #4b5563;
+      margin-bottom: 16px;
+    }
+    .hero-text {
+      font-size: 15px;
+      color: #6b7280;
+      margin-bottom: 24px;
+    }
+    .primary-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      border-radius: 999px;
+      background: #4c6fff;
+      color: #fff;
+      font-size: 14px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(76, 111, 255, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .primary-btn:hover {
+      background: #6e8bff;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(76, 111, 255, 0.45);
+    }
+    .primary-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 6px 14px rgba(76, 111, 255, 0.35);
+    }
+
+    /* 轮播样式 */
+    .carousel {
+      background: #fff;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(15, 23, 42, 0.12);
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .carousel-image-wrapper {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      height: 280px;
+    }
+    .carousel-image-wrapper img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.6s ease, transform 0.6s ease;
+      transform: scale(1.02);
+    }
+    .carousel-image-wrapper img.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .carousel-caption {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #6b7280;
+      text-align: center;
+    }
+    .carousel-controls {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 8px;
+      transform: translateY(-50%);
+      pointer-events: none;
+    }
+    .carousel-arrow {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      pointer-events: auto;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
+      transition: background 0.15s ease, transform 0.15s ease;
+      user-select: none;
+    }
+    .carousel-arrow:hover {
+      background: #e5e7eb;
+      transform: translateY(-1px);
+    }
+    .carousel-indicators {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 8px;
+    }
+    .carousel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #d1d5db;
+      cursor: pointer;
+      transition: width 0.2s ease, background 0.2s ease;
+    }
+    .carousel-dot.active {
+      width: 16px;
+      background: #4c6fff;
+    }
+
+    /* 关于我 */
+    .about {
+      background: #fff;
+    }
+    .about-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      text-align: left;
+    }
+    .about-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .about-tag {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #e5e7eb;
+      font-size: 12px;
+      color: #4b5563;
+      background: #f9fafb;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+    .about-tag:hover {
+      background: #4c6fff;
+      color: #fff;
+      border-color: #4c6fff;
+    }
+    .about p {
+      font-size: 15px;
+      color: #4b5563;
+      margin-bottom: 10px;
+    }
+
+    /* 社交媒体 */
+    .social {
+      background: #f3f4f6;
+    }
+    .social-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .social-header p {
+      color: #6b7280;
+      font-size: 14px;
+    }
+    .social-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .social-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 14px 16px;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      border: 1px solid transparent;
+    }
+    .social-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.16);
+      border-color: #4c6fff;
+    }
+    .social-main {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .social-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: #eef2ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #4c6fff;
+    }
+    .social-info-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .social-username {
+      font-size: 13px;
+      color: #6b7280;
+    }
+    .social-desc {
+      font-size: 13px;
+      color: #6b7280;
+    }
+    .social-footer {
+      display: flex;
+      justify-content: flex-end;
+    }
+    .social-link-btn {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .social-card:hover .social-link-btn {
+      background: #4c6fff;
+      border-color: #4c6fff;
+      color: #fff;
+    }
+
+    /* 邮箱行 */
+    .email-row {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 13px;
+      color: #6b7280;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .email-text {
+      word-wrap: break-word;
+    }
+    .email-copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #4c6fff;
+      cursor: pointer;
+    }
+
+    /* 页脚 */
+    footer {
+      padding: 16px 20px 24px;
+      font-size: 12px;
+      color: #9ca3af;
+      text-align: center;
+    }
+    .back-to-top {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #4c6fff;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* 响应式 */
+    @media (max-width: 768px) {
+      header {
+        padding: 0 16px;
+      }
+      .hero {
+        padding-top: 40px;
+      }
+      .hero-inner {
+        grid-template-columns: 1fr;
+      }
+      .hero-title {
+        font-size: 30px;
+      }
+      .hero-subtitle {
+        font-size: 16px;
+      }
+      .carousel-image-wrapper {
+        height: 240px;
+      }
+      section {
+        padding: 40px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Cindy Lee</div>
+    <nav>
+      <ul>
+        <li><a href="#home" class="nav-link active">首页</a></li>
+        <li><a href="#about" class="nav-link">关于我</a></li>
+        <li><a href="#social" class="nav-link">社交媒体</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Hero + 轮播 -->
+    <section id="home" class="hero">
+      <div class="container hero-inner">
+        <div>
+          <h1 class="hero-title">你好，我是 Adobe Lee</h1>
+          <p class="hero-subtitle">设计师 · 电影爱好者</p>
+          <p class="hero-text">
+            喜欢用代码和镜头记录生活中的灵感瞬间。这里是我的个人主页，你可以通过下面的社交平台找到我。
+          </p>
+          <button class="primary-btn" data-scroll-target="#social">查看我的社交媒体</button>
+        </div>
+        <div class="carousel" aria-label="个人照片轮播">
+          <div class="carousel-image-wrapper">
+            <!-- 替换为你自己的 AI 女生照片路径 -->
+            <img src="images/ai-girl1.jpg" alt="正面 1" class="active" data-caption="正面 1" />
+            <img src="images/ai-girl2.jpg" alt="后面 2" data-caption="后面 2" />
+            <img src="images/ai-girl3.jpg" alt="前面 3" data-caption="前面 3" />
+          </div>
+          <div class="carousel-controls">
+            <div class="carousel-arrow" data-direction="prev" aria-label="上一张">‹</div>
+            <div class="carousel-arrow" data-direction="next" aria-label="下一张">›</div>
+          </div>
+          <div class="carousel-caption">旅行 · 冰岛</div>
+          <div class="carousel-indicators">
+            <div class="carousel-dot active" data-index="0"></div>
+            <div class="carousel-dot" data-index="1"></div>
+            <div class="carousel-dot" data-index="2"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 关于我 -->
+    <section id="about" class="about">
+      <div class="container about-inner">
+        <h2>关于 Cindy Lee</h2>
+        <div class="about-tags">
+          <span class="about-tag">设计师</span>
+          <span class="about-tag">创意博客</span>
+          <span class="about-tag">旅行摄影</span>
+        </div>
+        <p>
+          我是一名设计师，专注于构建简洁、可靠、体验友好的视觉与交互体验。平时喜欢研究设计系统、品牌视觉和
+          用户体验相关的话题。
+        </p>
+        <p>
+          工作之余，我也会写博客、拍照、旅行，并在不同的社交平台上分享一些关于技术、工具和生活方式的思考。
+          如果你对这些内容感兴趣，欢迎在下面的平台关注我。
+        </p>
+      </div>
+    </section>
+
+    <!-- 社交媒体 -->
+    <section id="social" class="social">
+      <div class="container">
+        <div class="social-header">
+          <h2>在这些平台上找到我</h2>
+          <p>我会在这里分享代码、创作和生活瞬间。</p>
+        </div>
+
+        <div class="social-grid">
+          <!-- GitHub -->
+          <a class="social-card" href="https://github.com/yourname" target="_blank" rel="noreferrer">
+            <div class="social-main">
+              <div class="social-icon">🐙</div>
+              <div>
+                <div class="social-info-title">GitHub</div>
+                <div class="social-username">@yourname</div>
+              </div>
+            </div>
+            <div class="social-desc">开源项目、实验代码和学习笔记。</div>
+            <div class="social-footer">
+              <span class="social-link-btn">前往 GitHub →</span>
+            </div>
+          </a>
+
+          <!-- B站 -->
+          <a class="social-card" href="https://space.bilibili.com/yourid" target="_blank" rel="noreferrer">
+            <div class="social-main">
+              <div class="social-icon">📺</div>
+              <div>
+                <div class="social-info-title">哔哩哔哩</div>
+                <div class="social-username">@你的B站昵称</div>
+              </div>
+            </div>
+            <div class="social-desc">关于编程、效率工具和摄影的视频。</div>
+            <div class="social-footer">
+              <span class="social-link-btn">前往 B站 →</span>
+            </div>
+          </a>
+
+          <!-- 微博 -->
+          <a class="social-card" href="https://weibo.com/yourid" target="_blank" rel="noreferrer">
+            <div class="social-main">
+              <div class="social-icon">💬</div>
+              <div>
+                <div class="social-info-title">微博</div>
+                <div class="social-username">@你的微博昵称</div>
+              </div>
+            </div>
+            <div class="social-desc">日常动态、读书和灵感碎片。</div>
+            <div class="social-footer">
+              <span class="social-link-btn">前往 微博 →</span>
+            </div>
+          </a>
+
+          <!-- 小红书（示例） -->
+          <a class="social-card" href="https://www.xiaohongshu.com/user/yourid" target="_blank" rel="noreferrer">
+            <div class="social-main">
+              <div class="social-icon">📷</div>
+              <div>
+                <div class="social-info-title">小红书</div>
+                <div class="social-username">@你的小红书昵称</div>
+              </div>
+            </div>
+            <div class="social-desc">旅行、生活方式和摄影记录。</div>
+            <div class="social-footer">
+              <span class="social-link-btn">前往 小红书 →</span>
+            </div>
+          </a>
+        </div>
+
+        <div class="email-row">
+          <div class="email-text">邮箱联系（商务合作 / 沟通交流）：<span id="email-text">youremail@example.com</span></div>
+          <div class="email-copy-btn" id="email-copy">
+            <span>复制邮箱地址</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div>© 2026 张三. All rights reserved.</div>
+    <div class="back-to-top" data-scroll-target="#home">
+      <span>回到顶部</span> <span>↑</span>
+    </div>
+  </footer>
+
+  <script>
+    // 导航高亮 & 平滑滚动
+    const navLinks = document.querySelectorAll(".nav-link");
+    const sections = [...document.querySelectorAll("section")];
+
+    function setActiveNav() {
+      const scrollPos = window.scrollY + 80;
+      let currentId = "home";
+      sections.forEach(sec => {
+        if (scrollPos >= sec.offsetTop && scrollPos < sec.offsetTop + sec.offsetHeight) {
+          currentId = sec.id;
+        }
+      });
+      navLinks.forEach(link => {
+        link.classList.toggle("active", link.getAttribute("href") === "#" + currentId);
+      });
+    }
+    window.addEventListener("scroll", setActiveNav);
+    setActiveNav();
+
+    // 导航和按钮点击平滑滚动（加强版，兼容 data-scroll-target）
+    document.addEventListener("click", e => {
+      const targetBtn = e.target.closest("[data-scroll-target]");
+      if (targetBtn) {
+        const sel = targetBtn.getAttribute("data-scroll-target");
+        const sec = document.querySelector(sel);
+        if (sec) {
+          e.preventDefault();
+          const top = sec.offsetTop - 50;
+          window.scrollTo({ top, behavior: "smooth" });
+        }
+      }
+    });
+
+    // 轮播逻辑
+    const carousel = document.querySelector(".carousel");
+    const images = carousel.querySelectorAll(".carousel-image-wrapper img");
+    const caption = carousel.querySelector(".carousel-caption");
+    const dots = carousel.querySelectorAll(".carousel-dot");
+    const arrows = carousel.querySelectorAll(".carousel-arrow");
+    let currentIndex = 0;
+    let autoTimer = null;
+
+    function showSlide(index) {
+      currentIndex = (index + images.length) % images.length;
+      images.forEach((img, i) => {
+        img.classList.toggle("active", i === currentIndex);
+      });
+      dots.forEach((dot, i) => {
+        dot.classList.toggle("active", i === currentIndex);
+      });
+      caption.textContent = images[currentIndex].dataset.caption || images[currentIndex].alt || "";
+    }
+
+    function startAuto() {
+      clearInterval(autoTimer);
+      autoTimer = setInterval(() => {
+        showSlide(currentIndex + 1);
+      }, 5000);
+    }
+
+    arrows.forEach(arrow => {
+      arrow.addEventListener("click", () => {
+        const dir = arrow.dataset.direction === "next" ? 1 : -1;
+        showSlide(currentIndex + dir);
+        startAuto();
+      });
+    });
+
+    dots.forEach(dot => {
+      dot.addEventListener("click", () => {
+        const idx = Number(dot.dataset.index || 0);
+        showSlide(idx);
+        startAuto();
+      });
+    });
+
+    carousel.addEventListener("mouseenter", () => {
+      clearInterval(autoTimer);
+    });
+    carousel.addEventListener("mouseleave", () => {
+      startAuto();
+    });
+
+    showSlide(0);
+    startAuto();
+
+    // 复制邮箱
+    const emailText = document.getElementById("email-text");
+    const emailCopy = document.getElementById("email-copy");
+
+    emailCopy.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(emailText.textContent.trim());
+        emailCopy.textContent = "已复制 ✓";
+        setTimeout(() => {
+          emailCopy.innerHTML = "<span>复制邮箱地址</span>";
+        }, 1500);
+      } catch (err) {
+        alert("复制失败，请手动复制邮箱地址。");
+      }
+    });
+  </script>
+</body>
+</html>
